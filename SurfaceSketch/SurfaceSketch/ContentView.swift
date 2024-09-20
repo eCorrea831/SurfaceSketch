@@ -7,6 +7,82 @@
 
 import SwiftUI
 import PhotosUI
+import SceneKit
+import ARKit
+
+class ARView: UIViewController, ARSCNViewDelegate {
+    var arView: ARSCNView {
+        self.view as! ARSCNView
+    }
+
+    override func loadView() {
+      self.view = ARSCNView(frame: .zero)
+    }
+
+    override func viewDidLoad() {
+       super.viewDidLoad()
+       arView.delegate = self
+       arView.scene = SCNScene()
+    }
+
+    // MARK: - Functions for standard AR view handling
+    override func viewDidAppear(_ animated: Bool) {
+       super.viewDidAppear(animated)
+    }
+
+    override func viewDidLayoutSubviews() {
+       super.viewDidLayoutSubviews()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+       super.viewWillAppear(animated)
+
+       let configuration = ARWorldTrackingConfiguration()
+       arView.session.run(configuration)
+       arView.delegate = self
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+       super.viewWillDisappear(animated)
+
+       arView.session.pause()
+    }
+
+    // MARK: - ARSCNViewDelegate
+    func sessionWasInterrupted(_ session: ARSession) {}
+
+    func sessionInterruptionEnded(_ session: ARSession) {}
+    func session(_ session: ARSession, didFailWithError error: Error)
+    {}
+    func session(_ session: ARSession, cameraDidChangeTrackingState
+    camera: ARCamera) {}
+}
+
+// MARK: - ARViewIndicator
+struct ARViewIndicator: UIViewControllerRepresentable {
+   typealias UIViewControllerType = ARView
+
+   func makeUIViewController(context: Context) -> ARView {
+    ARView()
+   }
+
+   func updateUIViewController(_ uiViewController:
+   ARViewIndicator.UIViewControllerType, context:
+   UIViewControllerRepresentableContext<ARViewIndicator>) { }
+}
+
+// MARK: - NavigationIndicator
+struct NavigationIndicator: UIViewControllerRepresentable {
+   typealias UIViewControllerType = ARView
+
+   func makeUIViewController(context: Context) -> ARView {
+    ARView()
+   }
+
+   func updateUIViewController(_ uiViewController:
+   NavigationIndicator.UIViewControllerType, context:
+   UIViewControllerRepresentableContext<NavigationIndicator>) { }
+}
 
 struct ContentView: View {
     @State private var showPhotoPicker = false
@@ -14,17 +90,23 @@ struct ContentView: View {
     @State private var sketchItem: PhotosPickerItem?
     @State private var sketchImage: Image?
 
+//    var changingNode = SKSpriteNode()
+//    var selectedNode = SKSpriteNode()
+
     var body: some View {
-        VStack {
-            if showIntro {
-                intro
-            } else {
-                arInstructions
+        ZStack {
+            NavigationIndicator()
+            VStack {
+                if showIntro {
+                    intro
+                } else {
+                    arInstructions
+                }
             }
-        }
-        .padding(16)
-        .sheet(isPresented: $showPhotoPicker) {
-            photoPicker
+            .padding(16)
+            .sheet(isPresented: $showPhotoPicker) {
+                photoPicker
+            }
         }
     }
 
@@ -34,6 +116,7 @@ struct ContentView: View {
             asset
             nextButton
         }
+        .frame(height: 400)
     }
 
     private var arInstructions: some View {
@@ -85,6 +168,7 @@ struct ContentView: View {
             }
         }
         .font(.largeTitle)
+        .fixedSize(horizontal: false, vertical: true)
         .multilineTextAlignment(.center)
     }
 
