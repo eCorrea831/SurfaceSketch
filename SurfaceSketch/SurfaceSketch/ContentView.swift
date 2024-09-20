@@ -8,14 +8,6 @@
 import SwiftUI
 import PhotosUI
 
-// - TODO:
-// - Enable photo capture
-// - Detect surfaces
-// - Render image on surface
-// - Adust opacity
-// - Make this prettier
-// - Move Image extension to own file
-
 struct ContentView: View {
     @State private var showPhotoPicker = false
     @State private var showIntro = true
