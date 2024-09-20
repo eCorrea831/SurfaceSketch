@@ -116,12 +116,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
-extension Image {
-    init?(data: Data) {
-    #if canImport(UIKit)
-        guard let uiImage = UIImage(data: data) else { return nil }
-        self.init(uiImage: uiImage)
-    #endif
-    }
-}

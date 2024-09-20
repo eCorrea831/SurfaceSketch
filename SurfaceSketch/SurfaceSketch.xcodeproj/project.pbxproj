@@ -14,6 +14,7 @@
 		EA1E91252C9E14F7007DBEF3 /* SurfaceSketchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1E91242C9E14F7007DBEF3 /* SurfaceSketchTests.swift */; };
 		EA1E912F2C9E14F7007DBEF3 /* SurfaceSketchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1E912E2C9E14F7007DBEF3 /* SurfaceSketchUITests.swift */; };
 		EA1E91312C9E14F7007DBEF3 /* SurfaceSketchUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1E91302C9E14F7007DBEF3 /* SurfaceSketchUITestsLaunchTests.swift */; };
+		EA1E913E2C9E2CAF007DBEF3 /* Image+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1E913D2C9E2CAF007DBEF3 /* Image+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 		EA1E912A2C9E14F7007DBEF3 /* SurfaceSketchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SurfaceSketchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA1E912E2C9E14F7007DBEF3 /* SurfaceSketchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurfaceSketchUITests.swift; sourceTree = "<group>"; };
 		EA1E91302C9E14F7007DBEF3 /* SurfaceSketchUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurfaceSketchUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		EA1E913D2C9E2CAF007DBEF3 /* Image+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				EA1E91152C9E14F6007DBEF3 /* ContentView.swift */,
 				EA1E91172C9E14F7007DBEF3 /* Assets.xcassets */,
 				EA1E91192C9E14F7007DBEF3 /* Preview Content */,
+				EA1E913D2C9E2CAF007DBEF3 /* Image+Extension.swift */,
 			);
 			path = SurfaceSketch;
 			sourceTree = "<group>";
@@ -259,6 +262,7 @@
 			files = (
 				EA1E91162C9E14F6007DBEF3 /* ContentView.swift in Sources */,
 				EA1E91142C9E14F6007DBEF3 /* SurfaceSketchApp.swift in Sources */,
+				EA1E913E2C9E2CAF007DBEF3 /* Image+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
