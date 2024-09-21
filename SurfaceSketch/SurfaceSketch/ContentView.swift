@@ -15,7 +15,6 @@ class ARView: UIViewController, ARSCNViewDelegate {
     private var changingNode: SCNNode?
     private var selectedNode: SCNNode?
     private var selectedImage: UIImage?
-    private var changingNodes: [SCNNode] = []
 
     var configuration = ARWorldTrackingConfiguration()
 
@@ -76,9 +75,6 @@ class ARView: UIViewController, ARSCNViewDelegate {
         changingNode = SCNNode(geometry: SCNPlane(width: width, height: height))
         changingNode?.eulerAngles.x = -.pi / 2
         node.addChildNode(changingNode!)
-        if let changingNode {
-            changingNodes.append(changingNode)
-        }
     }
 
     func setSelectedImage(_ image: UIImage?) {
@@ -102,9 +98,14 @@ class ARView: UIViewController, ARSCNViewDelegate {
 
         selectedNode = hitResult.node
         selectedNode?.geometry?.firstMaterial?.diffuse.contents = selectedImage
+        arView.scene.rootNode.addChildNode(selectedNode!) //this is wrong node
 
         configuration.planeDetection = []
         arView.session.run(configuration)
+
+        for node in arView.scene.rootNode.childNodes where node != selectedNode {
+            node.removeFromParentNode()
+        }
     }
 }
 
@@ -197,7 +198,7 @@ struct ContentView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 100)
-                Text("Choose a surface to sketch your image")
+                StrokeText(text: "Choose a surface to sketch your image", width: 0.2, color: .white)
             }
         }
     }
@@ -210,7 +211,7 @@ struct ContentView: View {
                 onEditingChanged: { _ in
                     navIndicator.adjustNodeOpacity(opacity: opacity)
                 })
-            Text("Opacity: \(String(format: "%.2f", opacity * 100))%")
+            StrokeText(text: "Opacity: \(String(format: "%.2f", opacity * 100))%", width: 0.5, color: .white)
         }
     }
 
@@ -235,18 +236,23 @@ struct ContentView: View {
     }
 
     private var cameraImage: some View {
-        Image(systemName: "camera")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 300)
+        ZStack {
+            Color(.white)
+                .cornerRadius(30)
+                .frame(width: 250, height: 200)
+            Image(systemName: "camera")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 200)
+        }
     }
 
     private var introInstructions: some View {
         Group {
             if sketchImage == nil {
-                Text("Tap the camera below to select an image")
+                StrokeText(text: "Tap the camera below to select an image", width: 0.5, color: .white)
             } else {
-                Text("Tap the image below to select a new image")
+                StrokeText(text: "Tap the image below to select a new image", width: 0.5, color: .white)
             }
         }
         .font(.largeTitle)
@@ -254,12 +260,15 @@ struct ContentView: View {
         .multilineTextAlignment(.center)
     }
 
+    @ViewBuilder
     private var nextButton: some View {
-        Button("Next") {
-            showIntro = false
-            navIndicator.startPlaneDetection()
+        if let sketchImage {
+            Button(action: dismissIntro) {
+                StrokeText(text: "Next", width: 0.5, color: .black)
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+            }
         }
-        .disabled(sketchImage == nil)
     }
 
     private var photoPicker: some View {
@@ -270,9 +279,9 @@ struct ContentView: View {
                         showPhotoPicker = false
                     }
 
-                    if let loaded = try? await sketchItem?.loadTransferable(type: Data.self) {
-                        sketchImage = Image(data: loaded)
-                        sketchUIImage = UIImage(data: loaded)
+                    if let loaded = try? await sketchItem?.loadTransferable(type: TransferableImage.self) {
+                        sketchImage = loaded.image
+                        sketchUIImage = loaded.uiImage
                         navIndicator.setArViewSelectedImage(sketchUIImage)
                     } else {
                         print("Failed")
@@ -280,8 +289,51 @@ struct ContentView: View {
                 }
             }
     }
+
+    private func dismissIntro() {
+        showIntro = false
+        navIndicator.startPlaneDetection()
+    }
 }
 
 #Preview {
     ContentView()
+}
+
+struct TransferableImage: Transferable {
+    let image: Image
+    let uiImage: UIImage
+
+    enum TransferError: Error {
+        case importFailed
+    }
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(importedContentType: .image) { data in
+            guard let uiImage = UIImage(data: data) else {
+                throw TransferError.importFailed
+            }
+            let image = Image(uiImage: uiImage)
+            return TransferableImage(image: image, uiImage: uiImage)
+        }
+    }
+}
+
+struct StrokeText: View {
+    let text: String
+    let width: CGFloat
+    let color: Color
+
+    var body: some View {
+        ZStack{
+            ZStack{
+                Text(text).offset(x:  width, y:  width)
+                Text(text).offset(x: -width, y: -width)
+                Text(text).offset(x: -width, y:  width)
+                Text(text).offset(x:  width, y: -width)
+            }
+            .foregroundColor(color)
+            Text(text)
+        }
+    }
 }
