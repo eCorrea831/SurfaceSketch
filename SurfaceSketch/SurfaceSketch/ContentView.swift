@@ -14,20 +14,23 @@ import UIKit
 class ARView: UIViewController, ARSCNViewDelegate {
     private var changingNode: SCNNode?
     private var selectedNode: SCNNode?
-    private var selectedImage: Image?
+    private var selectedImage: UIImage?
+    private var changingNodes: [SCNNode] = []
+
+    var configuration = ARWorldTrackingConfiguration()
 
     private var arView: ARSCNView {
         self.view as! ARSCNView
     }
 
     override func loadView() {
-      self.view = ARSCNView(frame: .zero)
+        self.view = ARSCNView(frame: .zero)
     }
 
     override func viewDidLoad() {
-       super.viewDidLoad()
-       arView.delegate = self
-       arView.scene = SCNScene()
+        super.viewDidLoad()
+        arView.delegate = self
+        arView.scene = SCNScene()
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectPlane))
         arView.addGestureRecognizer(tapGesture)
@@ -35,26 +38,24 @@ class ARView: UIViewController, ARSCNViewDelegate {
 
     // MARK: - Functions for standard AR view handling
     override func viewDidAppear(_ animated: Bool) {
-       super.viewDidAppear(animated)
+        super.viewDidAppear(animated)
     }
 
     override func viewDidLayoutSubviews() {
-       super.viewDidLayoutSubviews()
+        super.viewDidLayoutSubviews()
     }
 
     override func viewWillAppear(_ animated: Bool) {
-       super.viewWillAppear(animated)
+        super.viewWillAppear(animated)
 
-       let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.vertical, .horizontal]
-       arView.session.run(configuration)
-       arView.delegate = self
+        arView.session.run(configuration)
+        arView.delegate = self
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-       super.viewWillDisappear(animated)
+        super.viewWillDisappear(animated)
 
-       arView.session.pause()
+        arView.session.pause()
     }
 
     // MARK: - ARSCNViewDelegate
@@ -64,21 +65,33 @@ class ARView: UIViewController, ARSCNViewDelegate {
     func session(_ session: ARSession, didFailWithError error: Error)
     {}
     func session(_ session: ARSession, cameraDidChangeTrackingState
-    camera: ARCamera) {}
+                 camera: ARCamera) {}
 
     func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         guard let planeAnchor = anchor as? ARPlaneAnchor  else { return }
 
-        let width = CGFloat(planeAnchor.extent.x)
-        let height = CGFloat(planeAnchor.extent.z)
+        let width = CGFloat(planeAnchor.planeExtent.width)
+        let height = CGFloat(planeAnchor.planeExtent.height)
 
         changingNode = SCNNode(geometry: SCNPlane(width: width, height: height))
         changingNode?.eulerAngles.x = -.pi / 2
         node.addChildNode(changingNode!)
+        if let changingNode {
+            changingNodes.append(changingNode)
+        }
     }
 
-    func setSelectedImage(_ image: Image?) {
+    func setSelectedImage(_ image: UIImage?) {
         selectedImage = image
+    }
+
+    func adjustNodeOpacity(opacity: Double) {
+        selectedNode?.opacity = opacity
+    }
+
+    func startPlaneDetection() {
+        configuration.planeDetection = [.vertical, .horizontal]
+        arView.session.run(configuration)
     }
 
     @objc func selectPlane(_ gesture: UITapGestureRecognizer) {
@@ -88,92 +101,51 @@ class ARView: UIViewController, ARSCNViewDelegate {
         guard let hitResult = hitTestResults.first else { return }
 
         selectedNode = hitResult.node
-        highlightNode(hitResult.node)
+        selectedNode?.geometry?.firstMaterial?.diffuse.contents = selectedImage
 
-        if let image = selectedImage?.asUIImage() {
-            selectedNode?.geometry?.firstMaterial?.diffuse.contents = image
-        }
-        //unhighlight the others
-    }
-
-    func highlightNode(_ node: SCNNode) {
-        let (min, max) = node.boundingBox
-        let zCoord = node.position.z
-        let topLeft = SCNVector3Make(min.x, max.y, zCoord)
-        let bottomLeft = SCNVector3Make(min.x, min.y, zCoord)
-        let topRight = SCNVector3Make(max.x, max.y, zCoord)
-        let bottomRight = SCNVector3Make(max.x, min.y, zCoord)
-
-        let bottomSide = createLineNode(fromPos: bottomLeft, toPos: bottomRight, color: .red)
-        let leftSide = createLineNode(fromPos: bottomLeft, toPos: topLeft, color: .red)
-        let rightSide = createLineNode(fromPos: bottomRight, toPos: topRight, color: .red)
-        let topSide = createLineNode(fromPos: topLeft, toPos: topRight, color: .red)
-
-        [bottomSide, leftSide, rightSide, topSide].forEach {
-            $0.name = "test"
-            node.addChildNode($0)
-        }
-    }
-
-    func createLineNode(fromPos origin: SCNVector3, toPos destination: SCNVector3, color: UIColor) -> SCNNode {
-        let line = lineFrom(vector: origin, toVector: destination)
-        let lineNode = SCNNode(geometry: line)
-        let planeMaterial = SCNMaterial()
-        planeMaterial.diffuse.contents = color
-        line.materials = [planeMaterial]
-
-        return lineNode
-    }
-
-    func lineFrom(vector vector1: SCNVector3, toVector vector2: SCNVector3) -> SCNGeometry {
-        let indices: [Int32] = [0, 1]
-
-        let source = SCNGeometrySource(vertices: [vector1, vector2])
-        let element = SCNGeometryElement(indices: indices, primitiveType: .line)
-
-        return SCNGeometry(sources: [source], elements: [element])
-    }
-
-    func unhighlightNode(_ node: SCNNode) {
-        let highlightningNodes = node.childNodes { (child, stop) -> Bool in
-            child.name == "test"
-        }
-        highlightningNodes.forEach {
-            $0.removeFromParentNode()
-        }
+        configuration.planeDetection = []
+        arView.session.run(configuration)
     }
 }
 
 // MARK: - ARViewIndicator
 struct ARViewIndicator: UIViewControllerRepresentable {
-   typealias UIViewControllerType = ARView
+    typealias UIViewControllerType = ARView
 
-   func makeUIViewController(context: Context) -> ARView {
-    ARView()
-   }
+    func makeUIViewController(context: Context) -> ARView {
+        ARView()
+    }
 
-   func updateUIViewController(_ uiViewController:
-   ARViewIndicator.UIViewControllerType, context:
-   UIViewControllerRepresentableContext<ARViewIndicator>) { }
+    func updateUIViewController(_ uiViewController:
+                                ARViewIndicator.UIViewControllerType, context:
+                                UIViewControllerRepresentableContext<ARViewIndicator>) { }
 }
 
 // MARK: - NavigationIndicator
 struct NavigationIndicator: UIViewControllerRepresentable {
-   typealias UIViewControllerType = ARView
+    typealias UIViewControllerType = ARView
 
     private let arView = ARView()
 
-   func makeUIViewController(context: Context) -> ARView {
-       arView
-   }
+    func makeUIViewController(context: Context) -> ARView {
+        arView
+    }
 
-    func setArViewSelectedImage(_ image: Image?) {
+    func setArViewSelectedImage(_ image: UIImage?) {
         arView.setSelectedImage(image)
     }
 
-   func updateUIViewController(_ uiViewController:
-   NavigationIndicator.UIViewControllerType, context:
-   UIViewControllerRepresentableContext<NavigationIndicator>) { }
+    func adjustNodeOpacity(opacity: Double) {
+        arView.adjustNodeOpacity(opacity: opacity)
+    }
+
+    func startPlaneDetection() {
+        arView.startPlaneDetection()
+    }
+
+    func updateUIViewController(_ uiViewController:
+                                NavigationIndicator.UIViewControllerType, context:
+                                UIViewControllerRepresentableContext<NavigationIndicator>) { }
 }
 
 struct ContentView: View {
@@ -181,22 +153,28 @@ struct ContentView: View {
     @State private var showIntro = true
     @State private var sketchItem: PhotosPickerItem?
     @State private var sketchImage: Image?
+    @State private var sketchUIImage: UIImage?
+    @State private var opacity: Double = 1.0
 
     let navIndicator = NavigationIndicator()
 
     var body: some View {
         ZStack {
             navIndicator
-            VStack {
-                if showIntro {
-                    intro
-                } else {
-                    arInstructions
-                }
-            }
+            foreground
             .padding(16)
             .sheet(isPresented: $showPhotoPicker) {
                 photoPicker
+            }
+        }
+    }
+
+    private var foreground: some View {        
+        VStack {
+            if showIntro {
+                intro
+            } else {
+                arInstructions
             }
         }
     }
@@ -212,6 +190,7 @@ struct ContentView: View {
 
     private var arInstructions: some View {
         VStack {
+            slider
             Spacer()
             HStack(spacing: 30) {
                 sketchImage?
@@ -220,6 +199,18 @@ struct ContentView: View {
                     .frame(width: 100)
                 Text("Choose a surface to sketch your image")
             }
+        }
+    }
+
+    private var slider: some View {
+        VStack {
+            Slider(
+                value: $opacity,
+                in: 0...1,
+                onEditingChanged: { _ in
+                    navIndicator.adjustNodeOpacity(opacity: opacity)
+                })
+            Text("Opacity: \(String(format: "%.2f", opacity * 100))%")
         }
     }
 
@@ -266,26 +257,28 @@ struct ContentView: View {
     private var nextButton: some View {
         Button("Next") {
             showIntro = false
+            navIndicator.startPlaneDetection()
         }
         .disabled(sketchImage == nil)
     }
 
     private var photoPicker: some View {
         PhotosPicker("Select an image", selection: $sketchItem, matching: .images)
-        .onChange(of: sketchItem) {
-            Task {
-                defer {
-                    showPhotoPicker = false
-                }
+            .onChange(of: sketchItem) {
+                Task {
+                    defer {
+                        showPhotoPicker = false
+                    }
 
-                if let loaded = try? await sketchItem?.loadTransferable(type: Data.self) {
-                    sketchImage = Image(data: loaded)
-                    navIndicator.setArViewSelectedImage(sketchImage)
-                } else {
-                    print("Failed")
+                    if let loaded = try? await sketchItem?.loadTransferable(type: Data.self) {
+                        sketchImage = Image(data: loaded)
+                        sketchUIImage = UIImage(data: loaded)
+                        navIndicator.setArViewSelectedImage(sketchUIImage)
+                    } else {
+                        print("Failed")
+                    }
                 }
             }
-        }
     }
 }
 
