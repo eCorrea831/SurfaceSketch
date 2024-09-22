@@ -104,13 +104,11 @@
 		EA1E91122C9E14F6007DBEF3 /* SurfaceSketch */ = {
 			isa = PBXGroup;
 			children = (
+				EA9CD8D82CA0B54B006B96B3 /* App */,
+				EA9CD8D92CA0B56A006B96B3 /* Models */,
+				EA9CD8DB2CA0B5A4006B96B3 /* Views */,
+				EA9CD8DA2CA0B581006B96B3 /* Controllers */,
 				EA9CD8D52C9F892E006B96B3 /* Resources */,
-				EA1E91132C9E14F6007DBEF3 /* SurfaceSketchApp.swift */,
-				EA1E91152C9E14F6007DBEF3 /* SketchView.swift */,
-				EA9CD8CD2C9F8708006B96B3 /* StrokeText.swift */,
-				EA9CD8CF2C9F872F006B96B3 /* TransferableImage.swift */,
-				EA9CD8D12C9F8789006B96B3 /* ARView.swift */,
-				EA9CD8D32C9F886F006B96B3 /* ARNavigationIndicator.swift */,
 			);
 			path = SurfaceSketch;
 			sourceTree = "<group>";
@@ -148,6 +146,40 @@
 				EA9CD8D62CA0AA13006B96B3 /* Launch Screen.storyboard */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		EA9CD8D82CA0B54B006B96B3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				EA1E91132C9E14F6007DBEF3 /* SurfaceSketchApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		EA9CD8D92CA0B56A006B96B3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				EA9CD8CF2C9F872F006B96B3 /* TransferableImage.swift */,
+				EA9CD8D32C9F886F006B96B3 /* ARNavigationIndicator.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		EA9CD8DA2CA0B581006B96B3 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				EA9CD8D12C9F8789006B96B3 /* ARView.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		EA9CD8DB2CA0B5A4006B96B3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				EA1E91152C9E14F6007DBEF3 /* SketchView.swift */,
+				EA9CD8CD2C9F8708006B96B3 /* StrokeText.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

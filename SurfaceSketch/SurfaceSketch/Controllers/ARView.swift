@@ -30,9 +30,6 @@ class ARView: UIViewController, ARSCNViewDelegate {
 
         arView.delegate = self
         arView.scene = SCNScene()
-
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectPlane))
-        arView.addGestureRecognizer(tapGesture)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -40,6 +37,9 @@ class ARView: UIViewController, ARSCNViewDelegate {
 
         arView.session.run(configuration)
         arView.delegate = self
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectPlane))
+        arView.addGestureRecognizer(tapGesture)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -49,7 +49,8 @@ class ARView: UIViewController, ARSCNViewDelegate {
     }
 
     // MARK: - ARSCNViewDelegate
-    func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+    internal func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+
         guard let planeAnchor = anchor as? ARPlaneAnchor  else { return }
 
         let width = CGFloat(planeAnchor.planeExtent.width)
@@ -104,5 +105,6 @@ class ARView: UIViewController, ARSCNViewDelegate {
         arView.scene.rootNode.childNodes.forEach {
             $0.removeFromParentNode()
         }
+        isSurfaceSelected = false
     }
 }
