@@ -57,7 +57,10 @@ struct SketchView: View {
 
     private var arInstructions: some View {
         VStack {
-            slider
+            HStack {
+                slider
+                restartButton
+            }
             Spacer()
             HStack(spacing: 30) {
                 sketchImage?
@@ -154,9 +157,30 @@ struct SketchView: View {
             }
     }
 
+    @ViewBuilder
+    private var restartButton: some View {
+        if showOpacitySlider {
+            Button(action: restartExperience) {
+                Image(systemName: "arrow.counterclockwise")
+                    .fontWeight(.heavy)
+                    .frame(width: 100, height: 100)
+            }
+        }
+    }
+
     private func dismissIntro() {
         showIntro = false
         navIndicator.startPlaneDetection()
+    }
+
+    private func restartExperience() {
+        showIntro = true
+        sketchItem = nil
+        sketchImage = nil
+        sketchUIImage = nil
+        showOpacitySlider = false
+        opacity = 1.0
+        navIndicator.clearSurfaces()
     }
 }
 

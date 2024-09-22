@@ -99,4 +99,10 @@ class ARView: UIViewController, ARSCNViewDelegate {
         isSurfaceSelected = true
         didSelectSurface?()
     }
+
+    func clearSurfaces() {
+        arView.scene.rootNode.childNodes.forEach {
+            $0.removeFromParentNode()
+        }
+    }
 }

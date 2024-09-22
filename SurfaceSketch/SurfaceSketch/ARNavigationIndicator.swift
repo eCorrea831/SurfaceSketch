@@ -34,5 +34,9 @@ struct ARNavigationIndicator: UIViewControllerRepresentable {
         arView.startPlaneDetection()
     }
 
+    func clearSurfaces() {
+        arView.clearSurfaces()
+    }
+
     func updateUIViewController(_ uiViewController: ARView, context: Context) { }
 }
