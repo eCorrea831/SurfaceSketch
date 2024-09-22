@@ -24,7 +24,6 @@ struct SketchView: View {
         ZStack {
             navIndicator
             foreground
-            .padding(16)
             .sheet(isPresented: $showPhotoPicker) {
                 photoPicker
             }
@@ -44,6 +43,7 @@ struct SketchView: View {
                 arInstructions
             }
         }
+        .padding(16)
     }
 
     private var intro: some View {

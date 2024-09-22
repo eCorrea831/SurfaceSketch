@@ -18,15 +18,16 @@ class ARView: UIViewController, ARSCNViewDelegate {
     var isSurfaceSelected = false
 
     private var arView: ARSCNView {
-        self.view as! ARSCNView
+        view as! ARSCNView
     }
 
     override func loadView() {
-        self.view = ARSCNView(frame: .zero)
+        view = ARSCNView(frame: .zero)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         arView.delegate = self
         arView.scene = SCNScene()
 
@@ -77,11 +78,7 @@ class ARView: UIViewController, ARSCNViewDelegate {
     }
 
     @objc func selectPlane(_ gesture: UITapGestureRecognizer) {
-        if isSurfaceSelected {
-            rotateImage()
-        } else {
-            selectASurface(gesture)
-        }
+        isSurfaceSelected ? rotateImage() : selectASurface(gesture)
     }
 
     private func rotateImage() {
@@ -96,14 +93,10 @@ class ARView: UIViewController, ARSCNViewDelegate {
 
         selectedNode = hitResult.node
         selectedNode?.geometry?.firstMaterial?.diffuse.contents = selectedImage
-//        arView.scene.rootNode.addChildNode(selectedNode!) //this is wrong node
 
         configuration.planeDetection = []
         arView.session.run(configuration)
         isSurfaceSelected = true
         didSelectSurface?()
-        //        for node in arView.scene.rootNode.childNodes where node != selectedNode {
-        //            node.removeFromParentNode()
-        //        }
     }
 }
