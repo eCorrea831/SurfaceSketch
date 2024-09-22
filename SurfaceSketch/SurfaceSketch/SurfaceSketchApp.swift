@@ -11,7 +11,7 @@ import SwiftUI
 struct SurfaceSketchApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SketchView()
         }
     }
 }
